@@ -1,10 +1,7 @@
 import os
 import json
 import requests
-from typing import Union
 from dotenv import load_dotenv
-
-from django_celery_beat.models import ClockedSchedule, PeriodicTask
 
 from ...models import Message, Newsletter, Client
 
@@ -56,33 +53,14 @@ def get_filtered_clients(**kwargs):
 
     queryset = Client.objects.all()
 
-    if filter_by_code is not None:
+    if filter_by_code is not None and filter_by_code != '':
         queryset = queryset.filter(operator_code=filter_by_code)
 
-    if filter_by_tag is not None:
+    if filter_by_tag is not None and filter_by_tag != '':
         queryset = queryset.filter(tag=filter_by_tag)
 
     return queryset, newsletter
 
 
-def create_task(instance: Newsletter) -> Union[PeriodicTask, None]:
-    clocked_schedule, created = ClockedSchedule.objects.get_or_create(
-        clocked_time=instance.launch_datetime
-    )
-    kwargs = {"id_newsletter": instance.id}
-
-    if clocked_schedule:
-        task = PeriodicTask.objects.create(
-            name=f"Рассылка {instance.id}",
-            task="send_newsletter",
-            kwargs=json.dumps(kwargs),
-            clocked=clocked_schedule,
-            start_time=instance.launch_datetime,
-            expires=instance.end_datetime,
-            one_off=True,
-        )
-        return task
 
 
-def update_task(instance):
-    pass
