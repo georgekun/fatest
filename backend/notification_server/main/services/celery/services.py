@@ -1,7 +1,9 @@
-import os
+
 import json
 import requests
 from dotenv import load_dotenv
+
+from django.conf import settings
 
 from ...models import Message, Newsletter, Client
 
@@ -31,7 +33,7 @@ def send_message(message: Message) -> int:
     })
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {os.getenv('JWT_AUTH_TOKEN')}"
+        "Authorization": f"Bearer {settings.JWT_AUTH_TOKEN}"
     }
 
     try:

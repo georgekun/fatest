@@ -13,6 +13,7 @@ read -rp "JWT_AUTH_TOKEN FOR https://probe.fbrq.cloud/v1: " JWT_AUTH_TOKEN
 env_file="../notification_server/.env"
 echo $CELERY_BROKER_URL
 cat << EOF >$env_file
+
 DEBUG=$DEBUG
 CELERY_BROKER_URL=$CELERY_BROKER_URL
 CELERY_RESULT_BACKEND=$CELERY_RESULT_BACKEND
