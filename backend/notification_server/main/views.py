@@ -7,10 +7,7 @@ from .serializers import ClientShowSerializer, ClientSerializer
 from .serializers import NewsletterSerializer, NewsletterListSerializer
 from .serializers import MessageListSerializer
 
-
-# группировкой по статусам
-# получения детальной статистики отправленных сообщений по конкретной рассылке
-# обработки активных рассылок и отправки сообщений клиентам
+from .services.views.services import delete_connect_task
 
 
 class ClientListView(generics.ListAPIView):
@@ -62,8 +59,13 @@ class NewsletterDeleteView(generics.DestroyAPIView):
     queryset = Newsletter
     lookup_field = 'id'
 
+    def perform_destroy(self, instance):
+        delete_connect_task(instance)
+        instance.delete()
+
 
 class MessageListView(generics.ListAPIView):
+    # получения детальной статистики отправленных сообщений по конкретной рассылке
     queryset = Message.objects.all()
     serializer_class = MessageListSerializer
     lookup_field = 'id'
