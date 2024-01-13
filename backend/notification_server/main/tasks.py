@@ -1,7 +1,7 @@
 
 from celery import shared_task
 
-from .models import Statistics
+from .models import Statistic
 from .services.celery.services import get_filtered_clients, create_messages, send_message
 
 
@@ -9,7 +9,7 @@ from .services.celery.services import get_filtered_clients, create_messages, sen
 def send_newsletter(**kwargs):
     clients, newsletter = get_filtered_clients(**kwargs)
     messages = create_messages(clients, newsletter)
-    stats, created = Statistics.objects.get_or_create(newsletter=newsletter)
+    stats, created = Statistic.objects.get_or_create(newsletter=newsletter)
 
     for message in messages:
         status = send_message(message)
@@ -19,5 +19,6 @@ def send_newsletter(**kwargs):
             stats.count_success_sent_messages += 1
         stats.save()
         message.save()
+    return True
 
 
