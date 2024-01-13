@@ -1,7 +1,7 @@
 
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
-from .models import Client, Message, Newsletter, Statistics
+from .models import Client, Message, Newsletter, Statistic
 
 
 class ClientShowSerializer(ModelSerializer):
@@ -30,18 +30,31 @@ class NewsletterListSerializer(ModelSerializer):
         model = Newsletter
         fields = "__all__"
 
-    def get_count_sent_messages(self, obj):
-        stats = Statistics.objects.filter(newsletter=obj).first()
-        return stats.count_sent_messages
+    def get_count_sent_messages(self, instance):
+        stats = Statistic.objects.filter(newsletter=instance).first()
+        if stats:
+            return stats.count_sent_messages
 
-    def get_count_success_sent_messages(self, obj):
-        stats = Statistics.objects.filter(newsletter=obj).first()
-        stats = 1/0
-        return stats.count_success_sent_messages
+
+    def get_count_success_sent_messages(self, instance):
+        stats = Statistic.objects.filter(newsletter=instance).first()
+        if stats:
+            return stats.count_success_sent_messages
 
 
 class MessageListSerializer(ModelSerializer):
+    client_number_phone = SerializerMethodField()
+    message_text = SerializerMethodField()
     class Meta:
         model = Message
         fields = "__all__"
 
+    def get_client_number_phone(self, instance):
+        client = instance.client
+        if client:
+            return client.phone_number
+
+    def get_message_text(self, instance):
+        newsletter = instance.newsletter
+        if newsletter:
+            return newsletter.message_text
