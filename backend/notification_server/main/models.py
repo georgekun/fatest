@@ -1,14 +1,7 @@
 
 from django.db import models
+from django_celery_beat.models import PeriodicTask
 from django.utils import timezone
-
-# Сущность "рассылка" имеет атрибуты:
-# уникальный id рассылки
-# дата и время запуска рассылки
-# текст сообщения для доставки клиенту
-# фильтр свойств клиентов, на которых должна быть произведена рассылка (код мобильного оператора, тег)
-# дата и время окончания рассылки: если по каким-то причинам не успели разослать все сообщения -
-# никакие сообщения клиентам после этого времени доставляться не должны
 
 
 class Newsletter(models.Model):
@@ -20,29 +13,15 @@ class Newsletter(models.Model):
     end_datetime = models.DateTimeField()
 
     def __str__(self):
-        return f"id = {self.id}    start = {self.launch_datetime}   end = {self.end_datetime}"
-
-# Сущность "клиент" имеет атрибуты:
-# уникальный id клиента
-# номер телефона клиента в формате 7XXXXXXXXXX (X - цифра от 0 до 9)
-# код мобильного оператора
-# тег (произвольная метка)
-# часовой пояс
+        return f"Id: {self.id}    Message: {self.message_text}"
 
 
 class Client(models.Model):
     id = models.AutoField(primary_key=True)
-    phone_number = models.CharField(max_length=12)  
+    phone_number = models.CharField(max_length=12, unique=True)
     operator_code = models.CharField(max_length=10)
     tag = models.CharField(max_length=255)
     timezone = models.CharField(max_length=255)
-
-# Сущность "сообщение" имеет атрибуты:
-# уникальный id сообщения
-# дата и время создания (отправки)
-# статус отправки
-# id рассылки, в рамках которой было отправлено сообщение
-# id клиента, которому отправили
 
 
 class Message(models.Model):
@@ -53,10 +32,17 @@ class Message(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
 
 
-class Statistics(models.Model):
+class Statistic(models.Model):
     id = models.AutoField(primary_key=True)
     creation_datetime = models.DateTimeField(default=timezone.now)
     newsletter = models.ForeignKey(Newsletter, on_delete=models.CASCADE)
     count_sent_messages = models.IntegerField(default=0)
     count_success_sent_messages = models.IntegerField(default=0)
 
+
+class TaskNewsletterAssociation(models.Model):
+    periodic_task = models.ForeignKey(PeriodicTask, on_delete=models.CASCADE)
+    newsletter = models.ForeignKey(Newsletter, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Link - Task: {self.periodic_task}, Newsletter: {self.newsletter}"
