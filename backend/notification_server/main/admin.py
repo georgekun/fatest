@@ -1,5 +1,5 @@
 from django.contrib import admin
 
-from .models import Client, Newsletter, Message, Statistics
+from .models import Client, Newsletter, Message, Statistic
 
-admin.site.register([Client, Newsletter, Message, Statistics])
+admin.site.register([Client, Newsletter, Message, Statistic])
