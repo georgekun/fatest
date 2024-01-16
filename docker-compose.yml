@@ -11,17 +11,34 @@ services:
             - static_volume:/app/notification_server/django_static
         ports:
             - "8000:8000"
-        environment:
-            DEBUG: "False"
-            JWT_AUTH_TOKEN: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzYzNDE3MzEsImlzcyI6ImZhYnJpcXVlIiwibmFtZSI6Imh0dHBzOi8vdC5tZS9HZW9yZ2lLbiJ9.fd9AYvIoWR8_scjehMFmqvbfQfVRiBkxJs4m9Sy31go'
-            CELERY_BROKER_URL: "redis://redis:6379/0"
-            CELERY_RESULT_BACKEND: "redis://redis:6379/1"
-            DJANGO_DB: postgresql
-            POSTGRES_HOST: db
-            POSTGRES_NAME: postgres
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
-            POSTGRES_PORT: 5432
+        env_file:
+            - '.env'
+        depends_on:
+            - db
+            - redis
+    worker:
+        restart: unless-stopped
+        build:
+            context: .
+            dockerfile: ./docker/backend/Dockerfile
+        entrypoint: /app/docker/backend/worker-entrypoint.sh
+        volumes:
+            - static_volume:/app/notification_server/django_static
+        env_file:
+            - '.env'
+        depends_on:
+            - db
+            - redis
+    beat:
+        restart: unless-stopped
+        build:
+            context: .
+            dockerfile: ./docker/backend/Dockerfile
+        entrypoint: /app/docker/backend/beat-entrypoint.sh
+        volumes:
+            - static_volume:/app/notification_server/django_static
+        env_file:
+            - '.env'
         depends_on:
             - db
             - redis
@@ -30,6 +47,7 @@ services:
         image: redis:7.0.5-alpine
         expose:
             - 6379
+
     db:
         image: postgres:13.0-alpine
         restart: unless-stopped
@@ -39,12 +57,11 @@ services:
             POSTGRES_DB: postgres
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: postgres
-
         expose:
             - 5432
 
         container_name: db
-
+#
 volumes:
     static_volume: {}
     postgres_data: {}
