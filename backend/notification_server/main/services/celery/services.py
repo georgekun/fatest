@@ -1,9 +1,14 @@
+"""
+Здесь у нас функции, которые используются в task celery
+"""
 
 import json
 import requests
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from dotenv import load_dotenv
 
 from django.conf import settings
+from django.utils import timezone
 
 from ...models import Message, Newsletter, Client
 
@@ -64,5 +69,15 @@ def get_filtered_clients(**kwargs):
     return queryset, newsletter
 
 
+def create_task_for_mailing():
 
-
+    """ при старте приложения функция создаст периодическую задачу, для отправки почты"""
+    crontab, created = CrontabSchedule.objects.get_or_create(minute=0, hour=8, timezone='Europe/Moscow')
+    if created:
+        task = PeriodicTask.objects.get_or_create(
+            name="Отправка отчета на почту",
+            task='send_report_by_email',
+            crontab=crontab,
+            start_time=timezone.now()
+        )
+        return task
