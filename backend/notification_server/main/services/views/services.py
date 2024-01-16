@@ -1,3 +1,7 @@
+"""Здесь находятся функции,
+которые работают с моделями celery,
+после изменения нашей модели newsletter"""
+
 import json
 from datetime import datetime
 from typing import Union
