@@ -8,7 +8,7 @@ done
 
 until python manage.py migrate
 do
-    echo "Waiting for db to be ready..."
+    echo "Waiting for the database to be ready..."
     sleep 2
 done
 
