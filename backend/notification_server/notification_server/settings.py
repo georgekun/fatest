@@ -27,10 +27,9 @@ load_dotenv(env_path)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-+r$@dj+g1w2&qr=34z-+4e6ejwq22f(e5d4c)^c02@sz9b0em*'
 
-DEBUG = os.environ.get("DEBUG", True)
+DEBUG = bool(int(os.environ.get("DEBUG")))
+
 ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0", 'localhost']
-
-
 
 
 # Application definition
@@ -101,18 +100,18 @@ WSGI_APPLICATION = 'notification_server.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    },
-  # 'default': {
-  #       "ENGINE": "django.db.backends.postgresql",
-  #       "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
-  #       "NAME": os.environ.get("POSTGRES_NAME", "postgres"),
-  #       "USER": os.environ.get("POSTGRES_USER", "postgres"),
-  #       "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
-  #       "PORT": int(os.environ.get("POSTGRES_PORT", "542")),
-  # }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # },
+    'default':  {
+        "ENGINE": "django.db.backends.postgresql",
+        "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
+        "NAME": os.environ.get("POSTGRES_NAME", "postgres"),
+        "USER": os.environ.get("POSTGRES_USER", "postgres"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
+        "PORT": int(os.environ.get("POSTGRES_PORT", "542")),
+  }
 }
 
 JWT_AUTH_TOKEN = os.environ.get('JWT_AUTH_TOKEN')
@@ -125,7 +124,7 @@ CACHES = {
 }
 
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
-CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND")
+CELERY_RESULT_BACKEND = 'django-db'  # os.environ.get("CELERY_RESULT_BACKEND")
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -219,19 +218,21 @@ USE_TZ = True
 STATIC_URL = "/django_static/"
 STATIC_ROOT = BASE_DIR / "django_static"
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-EMAIL_HOST = 'mail.hosting.reg.ru'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'lk@zabyurist.ru'
-DEFAULT_FROM_EMAIL = 'lk@zabyurist.ru'
-EMAIL_HOST_PASSWORD = 'root159951'
+EMAIL_HOST = os.environ.get("EMAIL_HOST")
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = True
-# EMAIL_USE_SSL = True
+
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
